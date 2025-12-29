@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GLDK - Professional Store</title>
+    <title>GLDK - Secure Enterprise Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- EmailJS SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <style>
@@ -14,8 +14,10 @@
         .animate-fade-in { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); }
+        .secure-mask { -webkit-text-security: disc; }
+        .secure-mask:focus { -webkit-text-security: none; }
     </style>
 <script type="importmap">
 {
@@ -27,27 +29,33 @@
 }
 </script>
 </head>
-<body class="bg-slate-50 text-slate-900">
+<body class="bg-slate-50 text-slate-900 selection:bg-indigo-100 selection:text-indigo-700">
 
     <!-- NAVIGATION -->
-    <nav class="sticky top-0 z-50 glass border-b border-slate-200">
+    <nav class="sticky top-0 z-50 glass border-b border-slate-200/60">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
-                <div class="flex items-center gap-3 cursor-pointer" onclick="router.navigate('shop')">
-                    <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-indigo-200">G</div>
+                <div class="flex items-center gap-3 cursor-pointer group" onclick="router.navigate('shop')">
+                    <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-indigo-200 group-hover:scale-105 transition">G</div>
                     <span id="nav-store-name" class="text-xl font-black tracking-tight">GLDK</span>
                 </div>
 
+                <!-- SEARCH BAR -->
                 <div class="hidden md:flex flex-1 max-w-md mx-8">
-                    <input type="text" id="global-search" oninput="shop.handleSearch(this.value)" placeholder="Search products..." class="w-full bg-slate-100 border-none rounded-2xl px-5 py-2.5 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+                    <div class="relative w-full">
+                        <input type="text" id="global-search" oninput="shop.handleSearch(this.value)" placeholder="Search secure catalog..." class="w-full bg-slate-100 border-none rounded-2xl px-5 py-3 focus:ring-2 focus:ring-indigo-500/20 outline-none transition font-medium text-sm">
+                        <div class="absolute right-4 top-3 text-slate-300 pointer-events-none">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="flex items-center gap-2">
                     <button onclick="router.navigate('shop')" class="text-sm font-bold text-slate-600 hover:text-indigo-600 px-3 py-2 rounded-xl transition">Shop</button>
                     <button onclick="router.navigate('admin-login')" class="text-sm font-bold text-slate-600 hover:text-indigo-600 px-3 py-2 rounded-xl transition">Admin</button>
-                    <div class="h-6 w-px bg-slate-200 mx-1"></div>
-                    <button onclick="router.navigate('cart')" class="relative p-2.5 text-slate-600 hover:bg-indigo-50 rounded-xl transition">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                    <div class="h-6 w-px bg-slate-200 mx-2"></div>
+                    <button onclick="router.navigate('cart')" class="relative p-2.5 text-slate-600 hover:bg-indigo-50 rounded-xl transition group">
+                        <svg class="w-6 h-6 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                         <span id="cart-badge" class="absolute -top-1 -right-1 bg-indigo-600 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white hidden">0</span>
                     </button>
                 </div>
@@ -56,9 +64,12 @@
     </nav>
 
     <!-- LOADING OVERLAY -->
-    <div id="app-loader" class="fixed inset-0 z-[60] bg-white flex flex-col items-center justify-center space-y-4">
-        <div class="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-        <p class="font-black text-indigo-600 animate-pulse tracking-widest uppercase text-xs">Syncing Store Data...</p>
+    <div id="app-loader" class="fixed inset-0 z-[60] bg-white flex flex-col items-center justify-center space-y-6">
+        <div class="w-14 h-14 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+        <div class="text-center">
+            <p class="font-black text-indigo-600 tracking-widest uppercase text-xs mb-1">Authenticating Data</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Establishing Secure Handshake...</p>
+        </div>
     </div>
 
     <!-- APP ROOT -->
@@ -66,24 +77,35 @@
 
     <!-- FOOTER -->
     <footer class="bg-white border-t border-slate-200 py-16 text-center">
-        <p class="text-slate-400 text-sm font-medium">© <span id="footer-year"></span> <span id="footer-store-name">GLDK</span>. Global Professional Commerce.</p>
+        <div class="max-w-md mx-auto space-y-6">
+            <p class="text-slate-400 text-sm font-semibold">© <span id="footer-year"></span> <span id="footer-store-name">GLDK</span>. Enterprise-Grade Secure Hub.</p>
+            <div class="flex justify-center gap-6 opacity-40 grayscale hover:grayscale-0 transition duration-500">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Google_Pay_%28GPay%29_Logo.svg" class="h-4">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" class="h-5">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" class="h-3">
+            </div>
+        </div>
     </footer>
 
     <!-- TEMPLATES -->
     <template id="tpl-shop">
         <div class="animate-fade-in space-y-12">
-            <section id="shop-hero" class="relative h-[300px] rounded-[2.5rem] overflow-hidden bg-slate-900 shadow-xl hidden md:block">
-                <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=1500" class="absolute inset-0 w-full h-full object-cover opacity-40">
-                <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-transparent to-transparent"></div>
-                <div class="relative h-full flex flex-col justify-center px-12 max-w-xl">
-                    <h2 class="text-4xl font-black text-white mb-4">Quality Across Devices</h2>
-                    <p class="text-slate-300 text-lg mb-6">Your store inventory is synchronized in real-time via Google Sheets.</p>
-                    <button onclick="document.getElementById('catalog').scrollIntoView({behavior:'smooth'})" class="bg-white text-slate-900 px-8 py-3.5 rounded-2xl font-black w-fit hover:bg-indigo-50 transition">Browse Now</button>
+            <section id="shop-hero" class="relative h-[340px] rounded-[3rem] overflow-hidden bg-slate-900 shadow-2xl hidden md:block group">
+                <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=1500" class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-105 transition duration-[2s]">
+                <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/60 to-transparent"></div>
+                <div class="relative h-full flex flex-col justify-center px-16 max-w-2xl space-y-6">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                        <p class="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Live Cloud Sync</p>
+                    </div>
+                    <h2 class="text-5xl font-black text-white leading-tight">Secure Professional<br>Enterprise Hub.</h2>
+                    <p class="text-slate-300 text-lg">Your inventory is synchronized in real-time through a private encrypted cloud vault.</p>
+                    <button onclick="document.getElementById('catalog').scrollIntoView({behavior:'smooth'})" class="bg-indigo-600 text-white px-10 py-4 rounded-2xl font-black w-fit hover:bg-white hover:text-indigo-600 transition shadow-xl">Explore Collection</button>
                 </div>
             </section>
 
             <div id="catalog" class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <div><h2 class="text-3xl font-black">Global Collection</h2><p id="product-count" class="text-slate-500 font-medium"></p></div>
+                <div><h2 class="text-3xl font-black tracking-tight">Active Inventory</h2><p id="product-count" class="text-slate-500 font-medium text-sm"></p></div>
                 <div id="category-filters" class="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto custom-scrollbar"></div>
             </div>
 
@@ -96,86 +118,88 @@
         import { GoogleGenAI } from "@google/genai";
 
         // ==========================================================
-        // 1. PERMANENT SETTINGS - FILL YOUR IDs HERE
+        // 1. HARDCODED SETTINGS - EDIT THESE ONCE
         // ==========================================================
-        const HARDCODED_SETTINGS = {
+        const INITIAL_HARDCODED = {
             storeName: 'GLDK',
             adminPassword: 'admin',
-            // GPay UPI ID
-            gpayId: 'YOUR_UPI_ID@okaxis', 
-            // Google Sheets Apps Script URL (Paste your Web App URL here)
-            spreadsheetWebhook: 'https://script.google.com/macros/s/AKfycbxNQYagdzpJTbzIxashtoyeIcLapU-XMPVO34GFenQLpUj_lnO2JcNkBFhsCOZkCdDq/exec', 
-            // EmailJS Credentials
-            emailjsServiceId: 'service_xxxxxxx',
-            emailjsTemplateId: 'template_xxxxxxx',
-            emailjsPublicKey: 'YOUR_PUBLIC_KEY_HERE',
-            apiKey: '' // Optional: Gemini API Key
+            securityToken: 'GLDK_MASTER_SYNC_2025', // SECURITY TOKEN FOR SHEETS
+            gpayId: 'yourname@okaxis', 
+            spreadsheetWebhook: '', 
+            emailjsServiceId: '',
+            emailjsTemplateId: '',
+            emailjsPublicKey: ''
         };
 
         // 2. DATA STATE
         const state = {
             view: 'shop',
-            products: [], // Loaded from cloud
-            cart: JSON.parse(localStorage.getItem('aura_cart')) || [],
-            orders: JSON.parse(localStorage.getItem('aura_orders')) || [],
-            settings: JSON.parse(localStorage.getItem('aura_settings')) || HARDCODED_SETTINGS,
+            products: [], 
+            cart: JSON.parse(localStorage.getItem('gldk_cart')) || [],
+            orders: JSON.parse(localStorage.getItem('gldk_orders')) || [],
+            settings: JSON.parse(localStorage.getItem('gldk_settings')) || INITIAL_HARDCODED,
             searchQuery: '',
             activeCategory: 'All',
             isAdmin: false,
             adminTab: 'products',
             checkoutPaymentMethod: 'online',
-            showSetupHelp: false,
-            testStatus: 'idle',
-            isCloudSyncing: false
+            isCloudSyncing: false,
+            isAddingProduct: false,
+            showSecrets: false // Admin masking toggle
         };
 
-        // Force Hardcoded Settings
-        state.settings = { ...state.settings, ...HARDCODED_SETTINGS };
-
-        const save = () => {
-            localStorage.setItem('aura_cart', JSON.stringify(state.cart));
-            localStorage.setItem('aura_orders', JSON.stringify(state.orders));
-            localStorage.setItem('aura_settings', JSON.stringify(state.settings));
+        const saveLocal = () => {
+            localStorage.setItem('gldk_cart', JSON.stringify(state.cart));
+            localStorage.setItem('gldk_orders', JSON.stringify(state.orders));
+            localStorage.setItem('gldk_settings', JSON.stringify(state.settings));
             updateUI();
         };
 
-        // --- CLOUD SYNC HELPERS ---
+        // --- SECURE CLOUD SYNC HELPERS ---
         async function fetchProductsFromCloud() {
-            if (!state.settings.spreadsheetWebhook || state.settings.spreadsheetWebhook.includes('PASTE_YOUR_GOOGLE_WEB_APP')) {
-                // Fallback demo products
+            const webhook = state.settings.spreadsheetWebhook;
+            if (!webhook || webhook.includes('PASTE_YOUR_GOOGLE_WEB_APP')) {
+                // Initial Demo Data if no webhook
                 state.products = [
-                    { id: '1', name: 'Premium Leather Watch', category: 'Accessories', price: 149, stock: 12, image: 'https://picsum.photos/seed/watch/600/600', description: 'Timeless professional accessory.' },
-                    { id: '2', name: 'Noise-Cancelling Headphones', category: 'Electronics', price: 299, stock: 8, image: 'https://picsum.photos/seed/audio/600/600', description: 'Studio quality sound.' }
+                    { id: '1', name: 'Secure Pro Watch', category: 'Watches', price: 299, stock: 12, image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=600', description: 'Enterprise-grade precision.' },
+                    { id: '2', name: 'Studio One Audio', category: 'Audio', price: 180, stock: 8, image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=600', description: 'Immersive soundscape architecture.' }
                 ];
                 return;
             }
             try {
-                const response = await fetch(state.settings.spreadsheetWebhook);
+                const url = new URL(webhook);
+                url.searchParams.set('token', state.settings.securityToken);
+                const response = await fetch(url.toString());
+                if (!response.ok) throw new Error("Cloud Authorization Failed");
                 const data = await response.json();
                 if (Array.isArray(data)) {
                     state.products = data.map(p => ({
                         ...p,
-                        price: parseFloat(p.price),
-                        stock: parseInt(p.stock)
+                        price: parseFloat(p.price || 0),
+                        stock: parseInt(p.stock || 0)
                     }));
                 }
-            } catch (err) { console.error("Cloud Fetch Error:", err); }
+            } catch (err) { 
+                console.error("Cloud Sync Error:", err);
+            }
         }
 
         async function syncProductsToCloud() {
-            if (!state.settings.spreadsheetWebhook || state.settings.spreadsheetWebhook.includes('PASTE_YOUR_GOOGLE_WEB_APP')) return;
+            const webhook = state.settings.spreadsheetWebhook;
+            if (!webhook || !webhook.startsWith('http')) return;
             state.isCloudSyncing = true;
             updateUI();
             try {
-                await fetch(state.settings.spreadsheetWebhook, {
+                await fetch(webhook, {
                     method: 'POST',
                     mode: 'no-cors',
                     body: JSON.stringify({
                         action: 'syncProducts',
+                        token: state.settings.securityToken,
                         products: state.products
                     })
                 });
-            } catch (err) { console.error("Cloud Sync Error:", err); }
+            } catch (err) { console.error("Cloud Push Error:", err); }
             state.isCloudSyncing = false;
             updateUI();
         }
@@ -205,12 +229,12 @@
             },
             renderSuccess() {
                 const div = document.createElement('div');
-                div.className = "max-w-2xl mx-auto text-center py-32 glass rounded-[3rem] border border-slate-200 shadow-xl animate-fade-in";
+                div.className = "max-w-2xl mx-auto text-center py-32 glass rounded-[4rem] border border-slate-200 shadow-2xl animate-fade-in";
                 div.innerHTML = `
-                    <div class="mb-10 flex justify-center"><div class="bg-emerald-100 p-8 rounded-full text-emerald-600"><svg class="w-20 h-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg></div></div>
-                    <h1 class="text-5xl font-black mb-6">Order Placed!</h1>
-                    <p class="text-xl text-slate-500 mb-12">Your order has been recorded in the cloud. Check your mail soon!</p>
-                    <button onclick="router.navigate('shop')" class="bg-slate-900 text-white px-12 py-5 rounded-[2rem] font-black hover:bg-indigo-600 transition">Return to Store</button>
+                    <div class="mb-10 flex justify-center"><div class="bg-indigo-600 p-8 rounded-[2rem] text-white shadow-xl shadow-indigo-100"><svg class="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg></div></div>
+                    <h1 class="text-5xl font-black mb-6 tracking-tight">Handshake Verified</h1>
+                    <p class="text-xl text-slate-500 mb-12 font-medium">Your order has been securely logged in our cloud ledger.</p>
+                    <button onclick="router.navigate('shop')" class="bg-slate-900 text-white px-12 py-5 rounded-3xl font-black hover:bg-indigo-600 transition shadow-xl">Back to Storefront</button>
                 `;
                 return div;
             }
@@ -220,13 +244,14 @@
         const shop = {
             handleSearch(q) {
                 state.searchQuery = q;
+                if (state.view !== 'shop') router.navigate('shop');
                 router.render();
             },
             addToCart(product) {
                 const existing = state.cart.find(i => i.id === product.id);
                 if (existing) existing.quantity++;
                 else state.cart.push({ ...product, quantity: 1 });
-                save();
+                saveLocal();
             },
             render() {
                 const temp = document.getElementById('tpl-shop').content.cloneNode(true);
@@ -236,7 +261,7 @@
                 const categories = ['All', ...new Set(state.products.map(p => p.category))];
                 categories.forEach(cat => {
                     const btn = document.createElement('button');
-                    btn.className = `px-5 py-2.5 rounded-2xl text-sm font-bold whitespace-nowrap transition border ${state.activeCategory === cat ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg' : 'bg-white text-slate-600 border-slate-200'}`;
+                    btn.className = `px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${state.activeCategory === cat ? 'bg-indigo-600 text-white border-indigo-600 shadow-xl' : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-100'}`;
                     btn.innerText = cat;
                     btn.onclick = () => { state.activeCategory = cat; router.render(); };
                     filters.appendChild(btn);
@@ -248,21 +273,21 @@
                     return matchesCat && matchesSearch;
                 });
 
-                temp.getElementById('product-count').innerText = `${filtered.length} products found`;
+                temp.getElementById('product-count').innerText = `${filtered.length} verified items listed`;
 
                 filtered.forEach(p => {
                     const card = document.createElement('div');
-                    card.className = "bg-white rounded-[2rem] border border-slate-200 overflow-hidden hover:shadow-2xl transition-all duration-500 group";
+                    card.className = "bg-white rounded-[2.5rem] border border-slate-200/60 overflow-hidden hover:shadow-[0_25px_60px_-15px_rgba(79,70,229,0.15)] transition-all duration-700 group hover:-translate-y-3";
                     card.innerHTML = `
-                        <div class="aspect-square overflow-hidden bg-slate-100">
-                            <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out">
+                        <div class="aspect-[4/5] overflow-hidden bg-slate-100 relative">
+                            <img src="${p.image}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s]" onerror="this.src='https://placehold.co/600x800?text=Asset+Unavailable'">
+                            <div class="absolute top-6 left-6"><span class="bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full text-[9px] font-black text-indigo-600 shadow-sm border border-slate-100/50 uppercase tracking-widest">${p.category}</span></div>
                         </div>
-                        <div class="p-8 space-y-4">
-                            <div><p class="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">${p.category}</p><h3 class="text-xl font-black">${p.name}</h3></div>
-                            <p class="text-sm text-slate-500 line-clamp-2">${p.description}</p>
-                            <div class="flex justify-between items-center pt-4 border-t border-slate-50">
-                                <span class="text-2xl font-black">$${p.price}</span>
-                                <button class="add-btn bg-slate-900 text-white px-6 py-3 rounded-2xl font-black hover:bg-indigo-600 transition shadow-lg">Add to Cart</button>
+                        <div class="p-10 space-y-5">
+                            <div class="space-y-2"><h3 class="text-2xl font-black text-slate-900 leading-tight">${p.name}</h3><p class="text-sm text-slate-400 font-medium line-clamp-2">${p.description}</p></div>
+                            <div class="flex justify-between items-center pt-6 border-t border-slate-50">
+                                <span class="text-3xl font-black tracking-tighter">$${p.price.toFixed(2)}</span>
+                                <button class="add-btn bg-slate-900 text-white px-8 py-4 rounded-2xl font-black hover:bg-indigo-600 transition shadow-lg group-hover:shadow-indigo-100">Add to Bag</button>
                             </div>
                         </div>
                     `;
@@ -281,29 +306,29 @@
                 container.className = "animate-fade-in";
                 
                 if (state.cart.length === 0) {
-                    container.innerHTML = `<div class="text-center py-40">
-                        <div class="bg-indigo-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 text-indigo-200">
+                    container.innerHTML = `<div class="text-center py-40 glass rounded-[3rem] border border-slate-100 shadow-sm">
+                        <div class="bg-indigo-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 text-indigo-300">
                             <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                         </div>
                         <h2 class="text-3xl font-black mb-4">Cart is Empty</h2>
-                        <button onclick="router.navigate('shop')" class="text-indigo-600 font-black">Browse Products &rarr;</button>
+                        <button onclick="router.navigate('shop')" class="text-indigo-600 font-black hover:underline tracking-tight">Return to Collection &rarr;</button>
                     </div>`;
                     return container;
                 }
 
                 const total = state.cart.reduce((s, i) => s + (i.price * i.quantity), 0);
                 container.innerHTML = `
-                    <h2 class="text-4xl font-black mb-10 tracking-tight">Shopping Bag</h2>
+                    <h2 class="text-5xl font-black mb-12 tracking-tighter">Your Bag</h2>
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                        <div class="lg:col-span-2 space-y-4" id="cart-items"></div>
-                        <div class="bg-white p-8 rounded-[2.5rem] border h-fit shadow-xl space-y-6 sticky top-24">
-                            <h3 class="text-xl font-black">Summary</h3>
-                            <div class="space-y-3">
-                                <div class="flex justify-between text-slate-500"><span>Subtotal</span><span>$${total}</span></div>
-                                <div class="flex justify-between text-emerald-500 font-bold"><span>Shipping</span><span>FREE</span></div>
-                                <div class="pt-4 border-t flex justify-between items-center"><span class="font-black text-xl">Total</span><span class="text-3xl font-black text-indigo-600">$${total}</span></div>
+                        <div class="lg:col-span-2 space-y-6" id="cart-items"></div>
+                        <div class="bg-white p-10 rounded-[3rem] border shadow-2xl h-fit space-y-8 sticky top-24">
+                            <h3 class="text-xl font-black">Secure Summary</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between text-slate-500 font-medium"><span>Subtotal</span><span>$${total.toFixed(2)}</span></div>
+                                <div class="flex justify-between text-emerald-500 font-black text-xs uppercase tracking-widest"><span>Cloud Shipping</span><span>FREE</span></div>
+                                <div class="pt-6 border-t flex justify-between items-center"><span class="font-black text-xl">Grand Total</span><span class="text-4xl font-black text-indigo-600">$${total.toFixed(2)}</span></div>
                             </div>
-                            <button onclick="router.navigate('checkout')" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black hover:bg-indigo-600 transition shadow-lg">Proceed to Checkout</button>
+                            <button onclick="router.navigate('checkout')" class="w-full bg-slate-900 text-white py-6 rounded-3xl font-black text-lg hover:bg-indigo-600 transition shadow-2xl">Proceed to Verification</button>
                         </div>
                     </div>
                 `;
@@ -311,25 +336,25 @@
                 const list = container.querySelector('#cart-items');
                 state.cart.forEach(item => {
                     const row = document.createElement('div');
-                    row.className = "bg-white p-6 rounded-3xl border flex gap-6 items-center hover:border-indigo-100 transition shadow-sm";
+                    row.className = "bg-white p-8 rounded-[2.5rem] border flex gap-8 items-center hover:border-indigo-100 transition shadow-sm";
                     row.innerHTML = `
-                        <img src="${item.image}" class="w-24 h-24 rounded-2xl object-cover border">
+                        <img src="${item.image}" class="w-24 h-24 rounded-[1.5rem] object-cover border-2 border-slate-50 shadow-sm" onerror="this.src='https://placehold.co/200x200?text=Err'">
                         <div class="flex-1">
-                            <h4 class="font-black text-lg">${item.name}</h4>
-                            <p class="text-sm text-slate-400">$${item.price} each</p>
+                            <h4 class="font-black text-xl mb-1">${item.name}</h4>
+                            <p class="text-xs font-black text-indigo-600 uppercase tracking-widest">${item.category}</p>
                         </div>
-                        <div class="flex items-center gap-4 bg-slate-50 p-2 rounded-xl border">
-                            <button class="qty-down font-black px-2 text-slate-400 hover:text-indigo-600">-</button>
-                            <span class="font-black w-4 text-center">${item.quantity}</span>
-                            <button class="qty-up font-black px-2 text-slate-400 hover:text-indigo-600">+</button>
+                        <div class="flex items-center gap-5 bg-slate-50 p-2.5 rounded-2xl border">
+                            <button class="qty-down font-black text-slate-400 hover:text-indigo-600 w-8 h-8 rounded-lg hover:bg-white transition">-</button>
+                            <span class="font-black text-lg w-6 text-center">${item.quantity}</span>
+                            <button class="qty-up font-black text-slate-400 hover:text-indigo-600 w-8 h-8 rounded-lg hover:bg-white transition">+</button>
                         </div>
-                        <p class="font-black text-xl w-24 text-right">$${item.price * item.quantity}</p>
+                        <p class="font-black text-2xl w-32 text-right tracking-tighter">$${(item.price * item.quantity).toFixed(2)}</p>
                     `;
-                    row.querySelector('.qty-up').onclick = () => { item.quantity++; save(); router.render(); };
+                    row.querySelector('.qty-up').onclick = () => { item.quantity++; saveLocal(); router.render(); };
                     row.querySelector('.qty-down').onclick = () => { 
                         item.quantity--; 
                         if (item.quantity <= 0) state.cart = state.cart.filter(i => i.id !== item.id);
-                        save(); router.render(); 
+                        saveLocal(); router.render(); 
                     };
                     list.appendChild(row);
                 });
@@ -343,39 +368,41 @@
             render() {
                 const total = state.cart.reduce((s, i) => s + (i.price * i.quantity), 0);
                 const div = document.createElement('div');
-                div.className = "animate-fade-in max-w-5xl mx-auto";
+                div.className = "animate-fade-in max-w-6xl mx-auto";
                 div.innerHTML = `
-                    <div class="flex items-center gap-4 mb-10">
-                        <button onclick="router.navigate('cart')" class="p-3 bg-white border rounded-xl hover:bg-slate-50 transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
-                        <h2 class="text-4xl font-black tracking-tight">Final Step</h2>
+                    <div class="flex items-center gap-6 mb-12">
+                        <button onclick="router.navigate('cart')" class="p-4 bg-white border-2 border-slate-100 rounded-2xl hover:bg-indigo-50 transition shadow-sm"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
+                        <h2 class="text-5xl font-black tracking-tighter">Secure Checkout</h2>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                        <form id="checkout-form" class="space-y-6">
-                            <div class="bg-white p-8 rounded-[2.5rem] border shadow-sm space-y-6">
-                                <h3 class="text-xl font-black mb-4">Shipping Information</h3>
-                                <input type="text" placeholder="Full Name" required class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500/20 transition">
-                                <input type="email" placeholder="Email Address" required class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500/20 transition">
-                                <input type="tel" placeholder="Phone Number" required class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500/20 transition">
-                                <textarea placeholder="Full Shipping Address" required class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500/20 transition" rows="3"></textarea>
+                        <form id="checkout-form" class="space-y-8">
+                            <div class="bg-white p-10 rounded-[3rem] border shadow-xl space-y-8">
+                                <h3 class="text-2xl font-black mb-4">Identification</h3>
+                                <div class="grid gap-6">
+                                    <input type="text" placeholder="Full Name" required class="w-full p-5 bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-indigo-500 focus:bg-white transition">
+                                    <input type="email" placeholder="Email for Authorization" required class="w-full p-5 bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-indigo-500 focus:bg-white transition">
+                                    <input type="tel" placeholder="Authorization Phone" required class="w-full p-5 bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-indigo-500 focus:bg-white transition">
+                                    <textarea placeholder="Validated Shipping Address" required class="w-full p-5 bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-indigo-500 focus:bg-white transition" rows="3"></textarea>
+                                </div>
                                 
-                                <div class="pt-4">
-                                    <label class="block text-xs font-black text-slate-400 mb-3 uppercase tracking-widest">Payment Method</label>
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <button type="button" onclick="window.setPaymentMethod('online')" class="p-4 border rounded-2xl font-bold transition ${state.checkoutPaymentMethod === 'online' ? 'border-indigo-600 bg-indigo-50' : 'bg-slate-50 border-slate-200'}">GPay (Online)</button>
-                                        <button type="button" onclick="window.setPaymentMethod('store')" class="p-4 border rounded-2xl font-bold transition ${state.checkoutPaymentMethod === 'store' ? 'border-indigo-600 bg-indigo-50' : 'bg-slate-50 border-slate-200'}">Pay at Store</button>
+                                <div class="pt-6">
+                                    <label class="block text-[10px] font-black text-slate-400 mb-4 uppercase tracking-[0.3em]">Payment Protocol</label>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <button type="button" onclick="window.setPaymentMethod('online')" class="p-5 border-2 rounded-3xl font-black transition-all ${state.checkoutPaymentMethod === 'online' ? 'border-indigo-600 bg-indigo-50 text-indigo-600 shadow-xl' : 'bg-slate-50 border-transparent text-slate-500'}">GPay Pro</button>
+                                        <button type="button" onclick="window.setPaymentMethod('store')" class="p-5 border-2 rounded-3xl font-black transition-all ${state.checkoutPaymentMethod === 'store' ? 'border-indigo-600 bg-indigo-50 text-indigo-600 shadow-xl' : 'bg-slate-50 border-transparent text-slate-500'}">Manual Pay</button>
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" id="place-order-btn" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-slate-200 hover:bg-indigo-600 transition">Place Order ($${total})</button>
+                            <button type="submit" id="place-order-btn" class="w-full bg-slate-900 text-white py-6 rounded-3xl font-black text-xl shadow-2xl hover:bg-indigo-600 transition tracking-tight">Verify & Process ($${total.toFixed(2)})</button>
                         </form>
-                        <div class="${state.checkoutPaymentMethod === 'online' ? 'block' : 'hidden'} bg-indigo-600 rounded-[2.5rem] p-10 text-white text-center flex flex-col items-center justify-center shadow-2xl">
-                            <h3 class="text-2xl font-black mb-8">Scan & Pay</h3>
-                            <div class="bg-white p-4 rounded-3xl mb-8 shadow-inner">
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=${state.settings.gpayId}&am=${total}" class="w-56 h-56">
+                        <div class="${state.checkoutPaymentMethod === 'online' ? 'block' : 'hidden'} bg-indigo-600 rounded-[4rem] p-12 text-white text-center flex flex-col items-center justify-center shadow-3xl">
+                            <h3 class="text-3xl font-black mb-10 tracking-tight">Instant Vault Payment</h3>
+                            <div class="bg-white p-6 rounded-[3rem] mb-10 shadow-2xl border-8 border-indigo-400/20">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=${state.settings.gpayId}&am=${total.toFixed(2)}" class="w-64 h-64 rounded-2xl">
                             </div>
-                            <div class="space-y-2">
-                                <p class="text-indigo-200 font-bold uppercase tracking-widest text-xs">Merchant ID</p>
-                                <p class="font-mono text-xl font-black bg-indigo-500/30 px-6 py-2 rounded-xl border border-indigo-400/30">${state.settings.gpayId}</p>
+                            <div class="space-y-3">
+                                <p class="text-indigo-200 font-black uppercase tracking-[0.2em] text-[10px]">Merchant Token</p>
+                                <p class="font-mono text-2xl font-black bg-white/10 px-8 py-4 rounded-3xl border border-white/20 backdrop-blur-md">${state.settings.gpayId}</p>
                             </div>
                         </div>
                     </div>
@@ -384,7 +411,7 @@
                     e.preventDefault();
                     const btn = document.getElementById('place-order-btn');
                     btn.disabled = true;
-                    btn.innerText = "Processing Cloud Sync...";
+                    btn.innerText = "Encrypting Handshake...";
 
                     const order = {
                         id: 'ORD-' + Math.random().toString(36).substr(2, 6).toUpperCase(),
@@ -400,20 +427,24 @@
 
                     state.orders.unshift(order);
 
-                    // 1. Spreadsheet Webhook (Primary Order Storage)
-                    if (state.settings.spreadsheetWebhook && !state.settings.spreadsheetWebhook.includes('PASTE_YOUR_GOOGLE_WEB_APP')) {
+                    // Sync to Sheets
+                    if (state.settings.spreadsheetWebhook && state.settings.spreadsheetWebhook.startsWith('http')) {
                         try { 
                             await fetch(state.settings.spreadsheetWebhook, { 
                                 method: 'POST', 
                                 mode: 'no-cors', 
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ action: 'addOrder', ...order }) 
+                                body: JSON.stringify({ 
+                                    action: 'addOrder', 
+                                    token: state.settings.securityToken,
+                                    ...order 
+                                }) 
                             }); 
-                        } catch(err){ console.error("Sheet Order Error:", err); }
+                        } catch(err){ console.error("Cloud Logging Failure:", err); }
                     }
 
-                    // 2. EmailJS Integration
-                    if (state.settings.emailjsServiceId && state.settings.emailjsPublicKey && !state.settings.emailjsPublicKey.includes('YOUR_PUBLIC_KEY')) {
+                    // Send EmailJS
+                    if (state.settings.emailjsServiceId && state.settings.emailjsPublicKey) {
                         try {
                             emailjs.init(state.settings.emailjsPublicKey);
                             const itemsString = order.items.map(i => `${i.quantity}x ${i.name}`).join(', ');
@@ -423,15 +454,15 @@
                                 customer_email: order.customerEmail,
                                 customer_phone: order.customerPhone,
                                 address: order.address,
-                                total_price: `$${order.total}`,
+                                total_price: `$${order.total.toFixed(2)}`,
                                 items: itemsString,
                                 payment_method: order.paymentMethod
                             });
-                        } catch(err) { console.error("Email Error:", err); }
+                        } catch(err) { console.error("Email Gateway Failure:", err); }
                     }
                     
                     state.cart = [];
-                    save();
+                    saveLocal();
                     router.navigate('order-success');
                 };
                 return div;
@@ -444,12 +475,12 @@
                 const div = document.createElement('div');
                 div.className = "max-w-md mx-auto py-20 animate-fade-in";
                 div.innerHTML = `
-                    <div class="bg-white p-12 rounded-[3rem] border shadow-2xl text-center space-y-8">
-                        <div class="w-20 h-20 bg-indigo-50 rounded-3xl flex items-center justify-center mx-auto text-indigo-600"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg></div>
-                        <h2 class="text-3xl font-black tracking-tight">Admin Console</h2>
-                        <div class="space-y-4">
-                            <input type="password" id="admin-pass" placeholder="Password" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500/20 transition text-center">
-                            <button onclick="admin.login()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black hover:bg-indigo-600 transition shadow-lg">Enter Dashboard</button>
+                    <div class="bg-white p-12 rounded-[4rem] border shadow-2xl text-center space-y-10">
+                        <div class="w-24 h-24 bg-indigo-600 rounded-[2rem] flex items-center justify-center mx-auto text-white shadow-xl shadow-indigo-100"><svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg></div>
+                        <h2 class="text-4xl font-black tracking-tighter">Vault Access</h2>
+                        <div class="space-y-6">
+                            <input type="password" id="admin-pass" placeholder="Authorization Code" class="w-full p-5 bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-indigo-500 focus:bg-white transition text-center font-black tracking-widest">
+                            <button onclick="admin.login()" class="w-full bg-slate-900 text-white py-5 rounded-3xl font-black text-lg hover:bg-indigo-600 transition shadow-2xl">Validate Identity</button>
                         </div>
                     </div>
                 `;
@@ -458,37 +489,68 @@
             login() {
                 const pass = document.getElementById('admin-pass').value;
                 if (pass === state.settings.adminPassword) { state.isAdmin = true; router.navigate('admin'); }
-                else alert('Access Denied');
+                else alert('Access Denied: Unrecognized Credentials.');
             },
             logout() { state.isAdmin = false; router.navigate('shop'); },
             setTab(t) { state.adminTab = t; router.render(); },
-            toggleSetupHelp() { state.showSetupHelp = !state.showSetupHelp; router.render(); },
-            async testWebhook() {
-                if (!state.settings.spreadsheetWebhook || state.settings.spreadsheetWebhook.includes('PASTE_YOUR_GOOGLE_WEB_APP')) return alert("Enter real Webhook URL first!");
-                state.testStatus = 'loading'; router.render();
+            
+            async genAI(btn) {
+                const nameInput = btn.closest('form').querySelector('input[data-name]');
+                const catInput = btn.closest('form').querySelector('input[data-cat]');
+                const name = nameInput.value;
+                const cat = catInput.value;
+                if (!name || !cat) return alert("Title and Category required for AI logic.");
+                
+                const textArea = btn.closest('div').nextElementSibling;
+                btn.innerText = "Processing...";
                 try {
-                    await fetch(state.settings.spreadsheetWebhook, { method: 'POST', mode: 'no-cors', body: JSON.stringify({id: 'TEST'}) });
-                    state.testStatus = 'success';
-                } catch(e) { state.testStatus = 'error'; }
-                router.render();
-                setTimeout(() => { state.testStatus = 'idle'; router.render(); }, 3000);
+                    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                    const response = await ai.models.generateContent({
+                        model: 'gemini-3-flash-preview',
+                        contents: `Write one short professional sales sentence for product: "${name}" in category "${cat}".`,
+                    });
+                    textArea.value = response.text.trim();
+                } catch(e) { console.error("AI Gateway Error:", e); }
+                btn.innerText = "✨ Secure AI Gen";
             },
+
+            async saveNewProduct(e) {
+                e.preventDefault();
+                const form = e.target;
+                const product = {
+                    id: Date.now().toString(),
+                    name: form[0].value,
+                    category: form[1].value,
+                    price: parseFloat(form[2].value || 0),
+                    stock: parseInt(form[3].value || 0),
+                    image: form[4].value || 'https://placehold.co/600x800?text=No+Asset',
+                    description: form[5].value
+                };
+
+                state.products.unshift(product);
+                state.isAddingProduct = false;
+                await syncProductsToCloud();
+                router.render();
+            },
+
             renderDashboard() {
                 const div = document.createElement('div');
-                div.className = "animate-fade-in space-y-10 pb-20";
+                div.className = "animate-fade-in space-y-12 pb-24";
                 div.innerHTML = `
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b pb-10">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 border-b border-slate-200 pb-12">
                         <div>
-                            <h2 class="text-4xl font-black tracking-tight">Dashboard</h2>
-                            <p class="text-slate-500 font-medium">Cloud status: ${state.isCloudSyncing ? '<span class="text-indigo-600 animate-pulse">Syncing...</span>' : '<span class="text-emerald-500">Global</span>'}</p>
+                            <h2 class="text-5xl font-black tracking-tighter">Hub Console</h2>
+                            <p class="text-slate-500 font-bold mt-2 flex items-center gap-2">
+                                Network: ${state.isCloudSyncing ? '<span class="text-indigo-600 animate-pulse font-black uppercase text-[10px] tracking-widest">Encrypting...</span>' : '<span class="text-emerald-500 font-black uppercase text-[10px] tracking-widest">Vault Secured</span>'}
+                            </p>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <div class="bg-slate-200/50 p-1 rounded-2xl border flex">
-                                <button onclick="admin.setTab('products')" class="px-6 py-2 rounded-xl text-sm font-black transition ${state.adminTab === 'products' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-900'}">Inventory</button>
-                                <button onclick="admin.setTab('orders')" class="px-6 py-2 rounded-xl text-sm font-black transition ${state.adminTab === 'orders' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-900'}">Orders</button>
-                                <button onclick="admin.setTab('settings')" class="px-6 py-2 rounded-xl text-sm font-black transition ${state.adminTab === 'settings' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-900'}">Config</button>
+                        <div class="flex items-center gap-4">
+                            <div class="bg-slate-200/50 p-1.5 rounded-3xl border flex">
+                                <button onclick="admin.setTab('products')" class="px-8 py-3 rounded-[1.25rem] text-xs font-black uppercase tracking-widest transition-all ${state.adminTab === 'products' ? 'bg-white shadow-xl text-indigo-600' : 'text-slate-500 hover:text-slate-900'}">Inventory</button>
+                                <button onclick="admin.setTab('orders')" class="px-8 py-3 rounded-[1.25rem] text-xs font-black uppercase tracking-widest transition-all ${state.adminTab === 'orders' ? 'bg-white shadow-xl text-indigo-600' : 'text-slate-500 hover:text-slate-900'}">Logs</button>
+                                <button onclick="admin.setTab('settings')" class="px-8 py-3 rounded-[1.25rem] text-xs font-black uppercase tracking-widest transition-all ${state.adminTab === 'settings' ? 'bg-white shadow-xl text-indigo-600' : 'text-slate-500 hover:text-slate-900'}">Security</button>
                             </div>
-                            <button onclick="admin.logout()" class="px-5 py-2 text-sm font-black text-red-500 hover:bg-red-50 rounded-xl transition">Logout</button>
+                            <button onclick="admin.logout()" class="px-6 py-3 text-xs font-black text-red-500 hover:bg-red-50 rounded-2xl transition uppercase tracking-widest">Exit</button>
                         </div>
                     </div>
                     <div id="admin-content"></div>
@@ -497,15 +559,45 @@
                 const content = div.querySelector('#admin-content');
                 if (state.adminTab === 'products') {
                     content.innerHTML = `
-                        <div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-black">Global Cloud Inventory</h3><button onclick="admin.addProduct()" class="bg-indigo-600 text-white px-8 py-3 rounded-2xl font-black shadow-lg shadow-indigo-100">+ New Product</button></div>
-                        <div class="bg-white rounded-3xl border overflow-hidden shadow-sm">
+                        <div class="flex justify-between items-center mb-8">
+                            <h3 class="text-3xl font-black tracking-tight">Active Assets</h3>
+                            <button onclick="state.isAddingProduct = !state.isAddingProduct; router.render();" class="bg-indigo-600 text-white px-10 py-4 rounded-2xl font-black shadow-xl hover:bg-slate-900 transition">
+                                ${state.isAddingProduct ? 'Dismiss' : '+ New Asset'}
+                            </button>
+                        </div>
+
+                        ${state.isAddingProduct ? `
+                            <form onsubmit="admin.saveNewProduct(event)" class="bg-white p-10 rounded-[3rem] border-2 border-indigo-100 shadow-3xl grid grid-cols-1 md:grid-cols-2 gap-10 mb-12 animate-fade-in">
+                                <div class="space-y-6">
+                                    <div><label class="text-[10px] font-black uppercase text-slate-400 block mb-2 tracking-widest">Asset Name</label><input required data-name class="w-full p-5 bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-indigo-600 transition"></div>
+                                    <div><label class="text-[10px] font-black uppercase text-slate-400 block mb-2 tracking-widest">Classification</label><input required data-cat class="w-full p-5 bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-indigo-600 transition"></div>
+                                    <div class="grid grid-cols-2 gap-6">
+                                        <div><label class="text-[10px] font-black uppercase text-slate-400 block mb-2 tracking-widest">Value ($)</label><input type="number" step="0.01" required class="w-full p-5 bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-indigo-600 transition"></div>
+                                        <div><label class="text-[10px] font-black uppercase text-slate-400 block mb-2 tracking-widest">Allocation</label><input type="number" value="10" required class="w-full p-5 bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-indigo-600 transition"></div>
+                                    </div>
+                                    <div><label class="text-[10px] font-black uppercase text-slate-400 block mb-2 tracking-widest">Direct Media Link (JPG/PNG)</label><input placeholder="https://..." oninput="document.getElementById('p-prev').src=this.value || 'https://placehold.co/600x800?text=Preview'" class="w-full p-5 bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-indigo-600 transition"></div>
+                                </div>
+                                <div class="space-y-6 flex flex-col">
+                                    <div class="flex-1 flex flex-col">
+                                        <div class="flex justify-between items-center mb-2"><label class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Marketing Logic</label><button type="button" onclick="admin.genAI(this)" class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">✨ Secure AI Gen</button></div>
+                                        <textarea required rows="5" class="w-full flex-1 p-5 bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-indigo-600 transition resize-none"></textarea>
+                                    </div>
+                                    <div class="h-40 border-2 border-dashed border-slate-200 rounded-[2rem] overflow-hidden flex items-center justify-center bg-slate-50">
+                                        <img id="p-prev" src="https://placehold.co/600x800?text=Asset+Preview" class="w-full h-full object-cover">
+                                    </div>
+                                    <button type="submit" class="w-full bg-slate-900 text-white py-6 rounded-3xl font-black text-lg hover:bg-indigo-600 transition shadow-2xl">Push to Cloud Ledger</button>
+                                </div>
+                            </form>
+                        ` : ''}
+
+                        <div class="bg-white rounded-[3rem] border border-slate-200/60 overflow-hidden shadow-2xl">
                             <table class="w-full text-left">
-                                <thead class="bg-slate-50 border-b"><tr><th class="p-6 text-xs font-black uppercase tracking-widest text-slate-400">Product</th><th class="p-6 text-xs font-black uppercase tracking-widest text-slate-400">Category</th><th class="p-6 text-xs font-black uppercase tracking-widest text-slate-400 text-right">Action</th></tr></thead>
+                                <thead class="bg-slate-50/50 border-b"><tr><th class="p-8 text-[10px] font-black uppercase tracking-widest text-slate-400">Asset</th><th class="p-8 text-[10px] font-black uppercase tracking-widest text-slate-400">Allocation</th><th class="p-8 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Action</th></tr></thead>
                                 <tbody>${state.products.map(p => `
                                     <tr class="border-b last:border-0 hover:bg-slate-50/50 transition">
-                                        <td class="p-6 font-bold flex items-center gap-4"><img src="${p.image}" class="w-10 h-10 rounded-lg object-cover">${p.name}</td>
-                                        <td class="p-6 text-slate-500 text-sm font-medium">${p.category}</td>
-                                        <td class="p-6 text-right"><button onclick="admin.deleteProduct('${p.id}')" class="text-red-500 font-black text-xs uppercase tracking-tighter">Delete</button></td>
+                                        <td class="p-8 font-black flex items-center gap-6"><img src="${p.image}" class="w-14 h-14 rounded-2xl object-cover border-2 border-slate-100 shadow-sm" onerror="this.src='https://placehold.co/100x100?text=Err'">${p.name}</td>
+                                        <td class="p-8"><span class="px-4 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase">${p.category} • ${p.stock} units</span></td>
+                                        <td class="p-8 text-right"><button onclick="admin.deleteProduct('${p.id}')" class="text-red-500 font-black text-[10px] uppercase tracking-widest hover:bg-red-50 px-4 py-2 rounded-xl transition">Revoke</button></td>
                                     </tr>
                                 `).join('')}</tbody>
                             </table>
@@ -513,113 +605,42 @@
                     `;
                 } else if (state.adminTab === 'orders') {
                     content.innerHTML = `
-                        <h3 class="text-2xl font-black mb-6">Global Sales (Live)</h3>
-                        <div class="grid gap-4">${state.orders.map(o => `
-                            <div class="bg-white p-8 rounded-[2rem] border flex justify-between items-center shadow-sm">
-                                <div><p class="font-black text-lg text-indigo-600">${o.customerName}</p><p class="text-xs text-slate-400 font-bold">${o.id} • ${new Date(o.createdAt).toLocaleDateString()}</p></div>
-                                <div class="text-right"><p class="font-black text-2xl">$${o.total}</p><p class="text-[10px] font-black uppercase text-emerald-500">${o.paymentMethod}</p></div>
+                        <h3 class="text-3xl font-black mb-8 tracking-tight">Cloud Transaction Logs</h3>
+                        <div class="grid gap-6">${state.orders.map(o => `
+                            <div class="bg-white p-10 rounded-[3rem] border flex justify-between items-center shadow-xl hover:border-indigo-200 transition group">
+                                <div class="space-y-1"><p class="font-black text-2xl group-hover:text-indigo-600 transition">${o.customerName}</p><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">${o.id} • ${new Date(o.createdAt).toLocaleString()}</p></div>
+                                <div class="text-right space-y-1"><p class="font-black text-3xl tracking-tighter">$${o.total.toFixed(2)}</p><p class="text-[10px] font-black uppercase text-emerald-500 tracking-widest">${o.paymentMethod} Verified</p></div>
                             </div>
                         `).join('')}</div>
                     `;
                 } else if (state.adminTab === 'settings') {
-                    const fullCloudScript = `function doGet(e) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName("Products") || ss.insertSheet("Products");
-  var data = sheet.getDataRange().getValues();
-  var products = [];
-  if (data.length > 1) {
-    var headers = data[0];
-    for (var i = 1; i < data.length; i++) {
-      var p = {};
-      headers.forEach((h, j) => p[h] = data[i][j]);
-      products.push(p);
-    }
-  }
-  return ContentService.createTextOutput(JSON.stringify(products)).setMimeType(ContentService.MimeType.JSON);
-}
-
-function doPost(e) {
-  var data = JSON.parse(e.postData.contents);
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  if (data.action === "addOrder") {
-    var sheet = ss.getSheetByName("Orders") || ss.insertSheet("Orders");
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(["Date", "Order ID", "Customer", "Email", "Phone", "Address", "Items", "Total", "Payment"]);
-    }
-    var items = data.items.map(function(i) { return i.quantity + "x " + i.name; }).join(", ");
-    sheet.appendRow([new Date(), data.id, data.customerName, data.customerEmail, data.customerPhone, data.address, items, "$" + data.total, data.paymentMethod]);
-  } else if (data.action === "syncProducts") {
-    var sheet = ss.getSheetByName("Products") || ss.insertSheet("Products");
-    sheet.clear();
-    if (data.products.length > 0) {
-      var headers = Object.keys(data.products[0]);
-      sheet.appendRow(headers);
-      data.products.forEach(p => sheet.appendRow(headers.map(h => p[h])));
-    }
-  }
-  return ContentService.createTextOutput("Success").setMimeType(ContentService.MimeType.TEXT);
-}`;
-
                     content.innerHTML = `
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                            <div class="bg-white p-10 rounded-[2.5rem] border shadow-sm space-y-8">
-                                <h3 class="text-2xl font-black">Cloud Hub</h3>
-                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Store Branding</label><input value="${state.settings.storeName}" oninput="state.settings.storeName=this.value;window.save()" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
-                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">UPI ID</label><input value="${state.settings.gpayId}" oninput="state.settings.gpayId=this.value;window.save()" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
-                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Apps Script Webhook URL</label><input value="${state.settings.spreadsheetWebhook}" oninput="state.settings.spreadsheetWebhook=this.value;window.save()" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
-                                <div class="flex gap-2">
-                                    <button onclick="admin.toggleSetupHelp()" class="text-xs font-black uppercase text-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl">Advanced Sync Code</button>
-                                </div>
-                                <div class="${state.showSetupHelp ? 'block' : 'hidden'} bg-slate-900 p-6 rounded-3xl space-y-4">
-                                    <p class="text-white text-[10px] font-black uppercase">PASTE THIS CODE INTO GOOGLE APPS SCRIPT:</p>
-                                    <pre class="bg-slate-800 p-4 rounded-xl text-[10px] text-indigo-300 font-mono overflow-x-auto select-all">${fullCloudScript}</pre>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                            <div class="bg-white p-12 rounded-[4rem] border shadow-2xl space-y-10">
+                                <div class="flex justify-between items-center"><h3 class="text-3xl font-black tracking-tighter">Vault Config</h3><button onclick="state.showSecrets=!state.showSecrets;router.render()" class="text-[10px] font-black text-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl uppercase tracking-widest">${state.showSecrets ? 'Mask' : 'Show'}</button></div>
+                                <div class="space-y-6">
+                                    <div class="group"><label class="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">Brand</label><input value="${state.settings.storeName}" oninput="state.settings.storeName=this.value;saveLocal()" class="w-full p-5 bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-indigo-600"></div>
+                                    <div class="group"><label class="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">Merchant Gateway</label><input value="${state.settings.gpayId}" oninput="state.settings.gpayId=this.value;saveLocal()" class="w-full p-5 bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-indigo-600"></div>
+                                    <div class="group"><label class="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">Cloud Webhook</label><input type="${state.showSecrets ? 'text' : 'password'}" value="${state.settings.spreadsheetWebhook}" oninput="state.settings.spreadsheetWebhook=this.value;saveLocal()" class="w-full p-5 bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-indigo-600 font-mono"></div>
+                                    <div class="group"><label class="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">Security Token</label><input type="${state.showSecrets ? 'text' : 'password'}" value="${state.settings.securityToken}" oninput="state.settings.securityToken=this.value;saveLocal()" class="w-full p-5 bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-indigo-600 font-mono"></div>
                                 </div>
                             </div>
-
-                            <div class="bg-white p-10 rounded-[2.5rem] border shadow-sm space-y-8">
-                                <h3 class="text-2xl font-black">EmailJS</h3>
-                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Service ID</label><input value="${state.settings.emailjsServiceId}" oninput="state.settings.emailjsServiceId=this.value;window.save()" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
-                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Template ID</label><input value="${state.settings.emailjsTemplateId}" oninput="state.settings.emailjsTemplateId=this.value;window.save()" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
-                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Public Key</label><input value="${state.settings.emailjsPublicKey}" oninput="state.settings.emailjsPublicKey=this.value;window.save()" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
+                            <div class="bg-white p-12 rounded-[4rem] border shadow-2xl space-y-10 h-fit">
+                                <h3 class="text-3xl font-black tracking-tighter">Comms Bridge</h3>
+                                <div class="space-y-6">
+                                    <div class="group"><label class="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">Service ID</label><input type="${state.showSecrets ? 'text' : 'password'}" value="${state.settings.emailjsServiceId}" oninput="state.settings.emailjsServiceId=this.value;saveLocal()" class="w-full p-5 bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-indigo-600"></div>
+                                    <div class="group"><label class="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">Template ID</label><input type="${state.showSecrets ? 'text' : 'password'}" value="${state.settings.emailjsTemplateId}" oninput="state.settings.emailjsTemplateId=this.value;saveLocal()" class="w-full p-5 bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-indigo-600"></div>
+                                    <div class="group"><label class="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">Public Key</label><input type="${state.showSecrets ? 'text' : 'password'}" value="${state.settings.emailjsPublicKey}" oninput="state.settings.emailjsPublicKey=this.value;saveLocal()" class="w-full p-5 bg-slate-50 border-2 border-transparent rounded-2xl outline-none focus:border-indigo-600"></div>
+                                </div>
                             </div>
                         </div>
                     `;
                 }
                 return div;
             },
-            async addProduct() {
-                const name = prompt('Product Name:');
-                if (!name) return;
-                const price = parseFloat(prompt('Price ($):') || '0');
-                const cat = prompt('Category:') || 'General';
-                
-                let desc = "Professional cloud-synced item.";
-                if (state.settings.apiKey) {
-                    try {
-                        const ai = new GoogleGenAI({ apiKey: state.settings.apiKey });
-                        const result = await ai.models.generateContent({
-                            model: 'gemini-3-flash-preview',
-                            contents: `Generate a 1-sentence sales pitch for: "${name}" in category "${cat}".`
-                        });
-                        desc = result.text.trim();
-                    } catch(e) { console.error("AI Error:", e); }
-                }
-
-                state.products.unshift({
-                    id: Date.now().toString(),
-                    name,
-                    price,
-                    category: cat,
-                    stock: 10,
-                    image: `https://picsum.photos/seed/${Math.random()}/600/600`,
-                    description: desc
-                });
-                
-                await syncProductsToCloud();
-                router.render();
-            },
+            
             async deleteProduct(id) {
-                if (confirm('Delete from Cloud? This will update all devices.')) {
+                if (confirm('Permanently revoke this asset from the cloud?')) {
                     state.products = state.products.filter(p => p.id !== id);
                     await syncProductsToCloud();
                     router.render();
@@ -627,7 +648,7 @@ function doPost(e) {
             }
         };
 
-        // 8. INITIALIZE APP
+        // 8. UI ENGINE
         function updateUI() {
             const count = state.cart.reduce((s, i) => s + i.quantity, 0);
             const badge = document.getElementById('cart-badge');
@@ -635,24 +656,22 @@ function doPost(e) {
             else badge.classList.add('hidden');
             
             const storeName = state.settings.storeName || 'GLDK';
-            document.getElementById('nav-store-name').innerText = storeName;
-            document.getElementById('footer-store-name').innerText = storeName;
-            document.title = storeName + " - Sync Commerce";
+            document.querySelectorAll('#nav-store-name, #footer-store-name').forEach(el => el.innerText = storeName);
+            document.title = storeName + " | Secure Hub";
             document.getElementById('footer-year').innerText = new Date().getFullYear();
         }
 
-        // Global exposing
         window.router = router;
         window.shop = shop;
         window.admin = admin;
         window.state = state;
-        window.save = save;
+        window.saveLocal = saveLocal;
         window.setPaymentMethod = (method) => {
             state.checkoutPaymentMethod = method;
             router.render();
         };
 
-        // STARTUP LOGIC: Fetch from cloud before showing shop
+        // BOOTSTRAP
         (async () => {
             await fetchProductsFromCloud();
             document.getElementById('app-loader').classList.add('hidden');

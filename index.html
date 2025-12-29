@@ -60,7 +60,7 @@
 
     <!-- FOOTER -->
     <footer class="bg-white border-t border-slate-200 py-16 text-center">
-        <p class="text-slate-400 text-sm font-medium">© <span id="footer-year"></span> <span id="footer-store-name"></span>. Professional E-commerce Platform.</p>
+        <p class="text-slate-400 text-sm font-medium">© <span id="footer-year"></span> <span id="footer-store-name">GLDK</span>. Professional E-commerce Platform.</p>
     </footer>
 
     <!-- TEMPLATES -->
@@ -89,7 +89,25 @@
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // 1. DATA STATE
+        // ==========================================================
+        // 1. PERMANENT SETTINGS - FILL YOUR IDs HERE
+        // ==========================================================
+        const HARDCODED_SETTINGS = {
+            storeName: 'GLDK',
+            adminPassword: '1178',
+            // --- PAYMENTS ---
+            gpayId: 'YOUR_UPI_ID@okaxis', // Replace with your UPI ID
+            // --- SPREADSHEET ---
+            spreadsheetWebhook: 'https://script.google.com/macros/s/AKfycbxjpwkV9nLWZRIGev4N50ARun2qJW8NHIYT9QZYzmVTXZKH9DNSP2XPSKr3XCTP63NJ/exec',
+            // --- EMAIL NOTIFICATIONS (EmailJS) ---
+            emailjsServiceId: 'service_xxxxxxx',
+            emailjsTemplateId: 'template_xxxxxxx',
+            emailjsPublicKey: 'YOUR_PUBLIC_KEY_HERE',
+            // --- AI FEATURES ---
+            apiKey: '' // Optional: Google Gemini API Key
+        };
+
+        // 2. DATA STATE
         const state = {
             view: 'shop',
             products: JSON.parse(localStorage.getItem('aura_products')) || [
@@ -99,16 +117,7 @@
             ],
             cart: JSON.parse(localStorage.getItem('aura_cart')) || [],
             orders: JSON.parse(localStorage.getItem('aura_orders')) || [],
-            settings: JSON.parse(localStorage.getItem('aura_settings')) || {
-                storeName: 'GLDK',
-                adminPassword: 'admin',
-                gpayId: 'store@upi',
-                spreadsheetWebhook: '',
-                emailjsServiceId: '',
-                emailjsTemplateId: '',
-                emailjsPublicKey: '',
-                apiKey: ''
-            },
+            settings: JSON.parse(localStorage.getItem('aura_settings')) || HARDCODED_SETTINGS,
             searchQuery: '',
             activeCategory: 'All',
             isAdmin: false,
@@ -118,6 +127,9 @@
             testStatus: 'idle'
         };
 
+        // Force Hardcoded Settings to stay in sync
+        state.settings = { ...state.settings, ...HARDCODED_SETTINGS };
+
         const save = () => {
             localStorage.setItem('aura_products', JSON.stringify(state.products));
             localStorage.setItem('aura_cart', JSON.stringify(state.cart));
@@ -126,7 +138,7 @@
             updateUI();
         };
 
-        // 2. ROUTING ENGINE
+        // 3. ROUTING ENGINE
         const router = {
             navigate(view) {
                 state.view = view;
@@ -162,7 +174,7 @@
             }
         };
 
-        // 3. SHOP COMPONENT
+        // 4. SHOP COMPONENT
         const shop = {
             handleSearch(q) {
                 state.searchQuery = q;
@@ -220,7 +232,7 @@
             }
         };
 
-        // 4. CART COMPONENT
+        // 5. CART COMPONENT
         const cart = {
             render() {
                 const container = document.createElement('div');
@@ -284,7 +296,7 @@
             }
         };
 
-        // 5. CHECKOUT COMPONENT
+        // 6. CHECKOUT COMPONENT
         const checkout = {
             render() {
                 const total = state.cart.reduce((s, i) => s + (i.price * i.quantity), 0);
@@ -352,7 +364,7 @@
                     state.orders.unshift(order);
 
                     // 1. Spreadsheet Webhook
-                    if (state.settings.spreadsheetWebhook) {
+                    if (state.settings.spreadsheetWebhook && !state.settings.spreadsheetWebhook.includes('PASTE_YOUR_SCRIPT_ID')) {
                         try { 
                             await fetch(state.settings.spreadsheetWebhook, { 
                                 method: 'POST', 
@@ -364,7 +376,7 @@
                     }
 
                     // 2. EmailJS Integration
-                    if (state.settings.emailjsServiceId && state.settings.emailjsTemplateId && state.settings.emailjsPublicKey) {
+                    if (state.settings.emailjsServiceId && state.settings.emailjsPublicKey && !state.settings.emailjsPublicKey.includes('YOUR_PUBLIC_KEY')) {
                         try {
                             emailjs.init(state.settings.emailjsPublicKey);
                             const itemsString = order.items.map(i => `${i.quantity}x ${i.name}`).join(', ');
@@ -389,7 +401,7 @@
             }
         };
 
-        // 6. ADMIN COMPONENTS
+        // 7. ADMIN COMPONENTS
         const admin = {
             renderLogin() {
                 const div = document.createElement('div');
@@ -416,7 +428,7 @@
             setTab(t) { state.adminTab = t; router.render(); },
             toggleSetupHelp() { state.showSetupHelp = !state.showSetupHelp; router.render(); },
             async testWebhook() {
-                if (!state.settings.spreadsheetWebhook) return alert("Enter URL first!");
+                if (!state.settings.spreadsheetWebhook || state.settings.spreadsheetWebhook.includes('PASTE_YOUR_SCRIPT_ID')) return alert("Enter your real Webhook URL first!");
                 state.testStatus = 'loading'; router.render();
                 try {
                     await fetch(state.settings.spreadsheetWebhook, { method: 'POST', mode: 'no-cors', body: JSON.stringify({id: 'TEST'}) });
@@ -479,37 +491,36 @@
     sheet.appendRow(["Date", "Order ID", "Customer", "Email", "Phone", "Address", "Items", "Total", "Payment", "Status"]);
   }
   var items = data.items.map(function(i) { return i.quantity + "x " + i.name; }).join(", ");
-  sheet.appendRow([new Date(), data.id, data.customerName, data.customerEmail, data.customerPhone, data.address, items, data.total, data.paymentMethod, "Pending"]);
+  sheet.appendRow([new Date(), data.id, data.customerName, data.customerEmail, data.customerPhone, data.address, items, "$" + data.total, data.paymentMethod, "Pending"]);
   return ContentService.createTextOutput("Success").setMimeType(ContentService.MimeType.TEXT);
 }`;
 
                     content.innerHTML = `
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
                             <div class="bg-white p-10 rounded-[2.5rem] border shadow-sm space-y-8">
-                                <h3 class="text-2xl font-black">Basic Settings</h3>
-                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Store Branding</label><input value="${state.settings.storeName}" onchange="state.settings.storeName=this.value;window.save()" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
-                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">UPI ID (Payments)</label><input value="${state.settings.gpayId}" onchange="state.settings.gpayId=this.value;window.save()" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
-                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Spreadsheet Webhook URL</label><input value="${state.settings.spreadsheetWebhook}" onchange="state.settings.spreadsheetWebhook=this.value;window.save()" placeholder="https://script.google.com/..." class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
+                                <h3 class="text-2xl font-black">Core Integration</h3>
+                                <p class="text-xs text-slate-400 font-medium">Note: Values filled in the <b>HARDCODED_SETTINGS</b> at the top of the index.html file will override these fields.</p>
+                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Store Branding</label><input value="${state.settings.storeName}" oninput="state.settings.storeName=this.value;window.save()" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
+                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">UPI ID (GPay QR)</label><input value="${state.settings.gpayId}" oninput="state.settings.gpayId=this.value;window.save()" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
+                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Spreadsheet Webhook URL</label><input value="${state.settings.spreadsheetWebhook}" oninput="state.settings.spreadsheetWebhook=this.value;window.save()" placeholder="https://script.google.com/..." class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
                                 <div class="flex gap-2">
-                                    <button onclick="admin.toggleSetupHelp()" class="text-xs font-black uppercase text-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl">Guide</button>
-                                    <button onclick="admin.testWebhook()" class="text-xs font-black uppercase ${state.testStatus === 'success' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-600 bg-slate-100'} px-4 py-2 rounded-xl">${state.testStatus === 'loading' ? 'Testing...' : state.testStatus === 'success' ? 'Working!' : 'Test'}</button>
+                                    <button onclick="admin.toggleSetupHelp()" class="text-xs font-black uppercase text-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl">Sheet Code</button>
+                                    <button onclick="admin.testWebhook()" class="text-xs font-black uppercase ${state.testStatus === 'success' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-600 bg-slate-100'} px-4 py-2 rounded-xl">${state.testStatus === 'loading' ? 'Testing...' : state.testStatus === 'success' ? 'Working!' : 'Test Connection'}</button>
                                 </div>
                                 <div class="${state.showSetupHelp ? 'block' : 'hidden'} bg-slate-900 p-6 rounded-3xl space-y-4">
-                                    <h4 class="text-white text-sm font-black uppercase tracking-widest">Google Apps Script Code</h4>
+                                    <h4 class="text-white text-sm font-black uppercase tracking-widest">Google Apps Script</h4>
                                     <pre class="bg-slate-800 p-4 rounded-xl text-[10px] text-indigo-300 font-mono overflow-x-auto select-all">${scriptCode}</pre>
-                                    <p class="text-[10px] text-slate-400 font-medium italic">Copy this code into Extensions > Apps Script in your Google Sheet.</p>
                                 </div>
                             </div>
 
                             <div class="bg-white p-10 rounded-[2.5rem] border shadow-sm space-y-8">
-                                <h3 class="text-2xl font-black">Email Notifications (EmailJS)</h3>
-                                <p class="text-xs text-slate-500">Receive order details directly in your inbox.</p>
-                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Service ID</label><input value="${state.settings.emailjsServiceId}" onchange="state.settings.emailjsServiceId=this.value;window.save()" placeholder="service_xxxx" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
-                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Template ID</label><input value="${state.settings.emailjsTemplateId}" onchange="state.settings.emailjsTemplateId=this.value;window.save()" placeholder="template_xxxx" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
-                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Public Key</label><input value="${state.settings.emailjsPublicKey}" onchange="state.settings.emailjsPublicKey=this.value;window.save()" placeholder="pk_xxxx" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
+                                <h3 class="text-2xl font-black">EmailJS Alerts</h3>
+                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Service ID</label><input value="${state.settings.emailjsServiceId}" oninput="state.settings.emailjsServiceId=this.value;window.save()" placeholder="service_xxxx" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
+                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Template ID</label><input value="${state.settings.emailjsTemplateId}" oninput="state.settings.emailjsTemplateId=this.value;window.save()" placeholder="template_xxxx" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
+                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Public Key</label><input value="${state.settings.emailjsPublicKey}" oninput="state.settings.emailjsPublicKey=this.value;window.save()" placeholder="pk_xxxx" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
                                 <div class="bg-indigo-50 p-6 rounded-3xl">
-                                    <h4 class="text-indigo-900 text-sm font-black uppercase tracking-widest mb-2">How to host free?</h4>
-                                    <p class="text-xs text-indigo-700 leading-relaxed">Go to your GitHub repo <b>Settings > Pages</b>. Select <b>main</b> branch and click <b>Save</b>. Your store will be live in 1 minute!</p>
+                                    <h4 class="text-indigo-900 text-sm font-black uppercase tracking-widest mb-2">Host with GitHub Pages</h4>
+                                    <p class="text-xs text-indigo-700 leading-relaxed">Go to <b>Settings > Pages</b>. Set Branch to <b>main</b> and click <b>Save</b>. Done!</p>
                                 </div>
                             </div>
                         </div>
@@ -523,13 +534,13 @@
                 const price = parseFloat(prompt('Price ($):') || '0');
                 const cat = prompt('Category:') || 'General';
                 
-                let desc = "Premium professional product.";
+                let desc = "Professional quality item.";
                 if (state.settings.apiKey) {
                     try {
                         const ai = new GoogleGenAI({ apiKey: state.settings.apiKey });
                         const result = await ai.models.generateContent({
                             model: 'gemini-3-flash-preview',
-                            contents: `Generate a 1-sentence sales pitch for a product called "${name}" in category "${cat}".`
+                            contents: `Generate a 1-sentence sales description for: "${name}" in category "${cat}".`
                         });
                         desc = result.text.trim();
                     } catch(e) { console.error("AI Error:", e); }
@@ -556,19 +567,21 @@
             }
         };
 
-        // 7. INITIALIZE APP
+        // 8. INITIALIZE APP
         function updateUI() {
             const count = state.cart.reduce((s, i) => s + i.quantity, 0);
             const badge = document.getElementById('cart-badge');
             if (count > 0) { badge.innerText = count; badge.classList.remove('hidden'); }
             else badge.classList.add('hidden');
             
-            const name = state.settings.storeName || 'GLDK';
-            document.getElementById('nav-store-name').innerText = name;
-            document.getElementById('footer-store-name').innerText = name;
+            const storeName = state.settings.storeName || 'GLDK';
+            document.getElementById('nav-store-name').innerText = storeName;
+            document.getElementById('footer-store-name').innerText = storeName;
+            document.title = storeName + " - Professional Store";
             document.getElementById('footer-year').innerText = new Date().getFullYear();
         }
 
+        // Global exposing
         window.router = router;
         window.shop = shop;
         window.admin = admin;

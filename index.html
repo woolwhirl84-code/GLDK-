@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuraCommerce - Professional Store</title>
+    <title>GLDK - Professional Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
     <!-- EmailJS SDK -->
@@ -34,8 +34,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
                 <div class="flex items-center gap-3 cursor-pointer" onclick="router.navigate('shop')">
-                    <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-indigo-200">A</div>
-                    <span id="nav-store-name" class="text-xl font-black tracking-tight">AuraCommerce</span>
+                    <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-indigo-200">G</div>
+                    <span id="nav-store-name" class="text-xl font-black tracking-tight">GLDK</span>
                 </div>
 
                 <div class="hidden md:flex flex-1 max-w-md mx-8">
@@ -100,7 +100,7 @@
             cart: JSON.parse(localStorage.getItem('aura_cart')) || [],
             orders: JSON.parse(localStorage.getItem('aura_orders')) || [],
             settings: JSON.parse(localStorage.getItem('aura_settings')) || {
-                storeName: 'AuraCommerce',
+                storeName: 'GLDK',
                 adminPassword: 'admin',
                 gpayId: 'store@upi',
                 spreadsheetWebhook: '',
@@ -112,7 +112,10 @@
             searchQuery: '',
             activeCategory: 'All',
             isAdmin: false,
-            adminTab: 'products'
+            adminTab: 'products',
+            checkoutPaymentMethod: 'online',
+            showSetupHelp: false,
+            testStatus: 'idle'
         };
 
         const save = () => {
@@ -300,10 +303,18 @@
                                 <input type="email" placeholder="Email Address" required class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500/20 transition">
                                 <input type="tel" placeholder="Phone Number" required class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500/20 transition">
                                 <textarea placeholder="Full Shipping Address" required class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500/20 transition" rows="3"></textarea>
+                                
+                                <div class="pt-4">
+                                    <label class="block text-xs font-black text-slate-400 mb-3 uppercase tracking-widest">Payment Method</label>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <button type="button" onclick="window.setPaymentMethod('online')" class="p-4 border rounded-2xl font-bold transition ${state.checkoutPaymentMethod === 'online' ? 'border-indigo-600 bg-indigo-50' : 'bg-slate-50 border-slate-200'}">GPay (Online)</button>
+                                        <button type="button" onclick="window.setPaymentMethod('store')" class="p-4 border rounded-2xl font-bold transition ${state.checkoutPaymentMethod === 'store' ? 'border-indigo-600 bg-indigo-50' : 'bg-slate-50 border-slate-200'}">Pay at Store</button>
+                                    </div>
+                                </div>
                             </div>
                             <button type="submit" id="place-order-btn" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-slate-200 hover:bg-indigo-600 transition">Place Order ($${total})</button>
                         </form>
-                        <div class="bg-indigo-600 rounded-[2.5rem] p-10 text-white text-center flex flex-col items-center justify-center shadow-2xl">
+                        <div class="${state.checkoutPaymentMethod === 'online' ? 'block' : 'hidden'} bg-indigo-600 rounded-[2.5rem] p-10 text-white text-center flex flex-col items-center justify-center shadow-2xl">
                             <h3 class="text-2xl font-black mb-8">Scan & Pay</h3>
                             <div class="bg-white p-4 rounded-3xl mb-8 shadow-inner">
                                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=${state.settings.gpayId}&am=${total}" class="w-56 h-56">
@@ -312,6 +323,11 @@
                                 <p class="text-indigo-200 font-bold uppercase tracking-widest text-xs">Merchant ID</p>
                                 <p class="font-mono text-xl font-black bg-indigo-500/30 px-6 py-2 rounded-xl border border-indigo-400/30">${state.settings.gpayId}</p>
                             </div>
+                        </div>
+                        <div class="${state.checkoutPaymentMethod === 'store' ? 'block' : 'hidden'} bg-slate-100 rounded-[2.5rem] p-10 text-slate-600 text-center flex flex-col items-center justify-center border-2 border-dashed border-slate-300">
+                             <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mb-6"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg></div>
+                             <h3 class="text-xl font-black mb-4">Store Pick-up</h3>
+                             <p class="text-sm">Place your order now and pay when you collect your items at our physical location.</p>
                         </div>
                     </div>
                 `;
@@ -327,6 +343,7 @@
                         customerEmail: e.target[1].value,
                         customerPhone: e.target[2].value,
                         address: e.target[3].value,
+                        paymentMethod: state.checkoutPaymentMethod,
                         total,
                         items: [...state.cart],
                         createdAt: new Date().toISOString()
@@ -336,7 +353,14 @@
 
                     // 1. Spreadsheet Webhook
                     if (state.settings.spreadsheetWebhook) {
-                        try { fetch(state.settings.spreadsheetWebhook, { method: 'POST', mode: 'no-cors', body: JSON.stringify(order) }); } catch(err){}
+                        try { 
+                            await fetch(state.settings.spreadsheetWebhook, { 
+                                method: 'POST', 
+                                mode: 'no-cors', 
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(order) 
+                            }); 
+                        } catch(err){ console.error("Sheet Sync Error:", err); }
                     }
 
                     // 2. EmailJS Integration
@@ -351,7 +375,8 @@
                                 customer_phone: order.customerPhone,
                                 address: order.address,
                                 total_price: `$${order.total}`,
-                                items: itemsString
+                                items: itemsString,
+                                payment_method: order.paymentMethod
                             });
                         } catch(err) { console.error("Email Error:", err); }
                     }
@@ -389,6 +414,17 @@
             },
             logout() { state.isAdmin = false; router.navigate('shop'); },
             setTab(t) { state.adminTab = t; router.render(); },
+            toggleSetupHelp() { state.showSetupHelp = !state.showSetupHelp; router.render(); },
+            async testWebhook() {
+                if (!state.settings.spreadsheetWebhook) return alert("Enter URL first!");
+                state.testStatus = 'loading'; router.render();
+                try {
+                    await fetch(state.settings.spreadsheetWebhook, { method: 'POST', mode: 'no-cors', body: JSON.stringify({id: 'TEST'}) });
+                    state.testStatus = 'success';
+                } catch(e) { state.testStatus = 'error'; }
+                router.render();
+                setTimeout(() => { state.testStatus = 'idle'; router.render(); }, 3000);
+            },
             renderDashboard() {
                 const div = document.createElement('div');
                 div.className = "animate-fade-in space-y-10 pb-20";
@@ -431,7 +467,7 @@
                         <div class="grid gap-4">${state.orders.map(o => `
                             <div class="bg-white p-8 rounded-[2rem] border flex justify-between items-center shadow-sm">
                                 <div><p class="font-black text-lg text-indigo-600">${o.customerName}</p><p class="text-xs text-slate-400 font-bold">${o.id} • ${new Date(o.createdAt).toLocaleDateString()}</p></div>
-                                <div class="text-right"><p class="font-black text-2xl">$${o.total}</p><p class="text-[10px] font-black uppercase text-emerald-500">Processing</p></div>
+                                <div class="text-right"><p class="font-black text-2xl">$${o.total}</p><p class="text-[10px] font-black uppercase text-emerald-500">${o.paymentMethod}</p></div>
                             </div>
                         `).join('')}</div>
                     `;
@@ -451,10 +487,14 @@
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
                             <div class="bg-white p-10 rounded-[2.5rem] border shadow-sm space-y-8">
                                 <h3 class="text-2xl font-black">Basic Settings</h3>
-                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Store Branding</label><input value="${state.settings.storeName}" onchange="state.settings.storeName=this.value;save()" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
-                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">UPI ID (Payments)</label><input value="${state.settings.gpayId}" onchange="state.settings.gpayId=this.value;save()" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
-                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Spreadsheet Webhook URL</label><input value="${state.settings.spreadsheetWebhook}" onchange="state.settings.spreadsheetWebhook=this.value;save()" placeholder="https://script.google.com/..." class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
-                                <div class="bg-slate-900 p-6 rounded-3xl space-y-4">
+                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Store Branding</label><input value="${state.settings.storeName}" onchange="state.settings.storeName=this.value;window.save()" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
+                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">UPI ID (Payments)</label><input value="${state.settings.gpayId}" onchange="state.settings.gpayId=this.value;window.save()" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
+                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Spreadsheet Webhook URL</label><input value="${state.settings.spreadsheetWebhook}" onchange="state.settings.spreadsheetWebhook=this.value;window.save()" placeholder="https://script.google.com/..." class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
+                                <div class="flex gap-2">
+                                    <button onclick="admin.toggleSetupHelp()" class="text-xs font-black uppercase text-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl">Guide</button>
+                                    <button onclick="admin.testWebhook()" class="text-xs font-black uppercase ${state.testStatus === 'success' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-600 bg-slate-100'} px-4 py-2 rounded-xl">${state.testStatus === 'loading' ? 'Testing...' : state.testStatus === 'success' ? 'Working!' : 'Test'}</button>
+                                </div>
+                                <div class="${state.showSetupHelp ? 'block' : 'hidden'} bg-slate-900 p-6 rounded-3xl space-y-4">
                                     <h4 class="text-white text-sm font-black uppercase tracking-widest">Google Apps Script Code</h4>
                                     <pre class="bg-slate-800 p-4 rounded-xl text-[10px] text-indigo-300 font-mono overflow-x-auto select-all">${scriptCode}</pre>
                                     <p class="text-[10px] text-slate-400 font-medium italic">Copy this code into Extensions > Apps Script in your Google Sheet.</p>
@@ -464,9 +504,9 @@
                             <div class="bg-white p-10 rounded-[2.5rem] border shadow-sm space-y-8">
                                 <h3 class="text-2xl font-black">Email Notifications (EmailJS)</h3>
                                 <p class="text-xs text-slate-500">Receive order details directly in your inbox.</p>
-                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Service ID</label><input value="${state.settings.emailjsServiceId}" onchange="state.settings.emailjsServiceId=this.value;save()" placeholder="service_xxxx" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
-                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Template ID</label><input value="${state.settings.emailjsTemplateId}" onchange="state.settings.emailjsTemplateId=this.value;save()" placeholder="template_xxxx" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
-                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Public Key</label><input value="${state.settings.emailjsPublicKey}" onchange="state.settings.emailjsPublicKey=this.value;save()" placeholder="pk_xxxx" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
+                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Service ID</label><input value="${state.settings.emailjsServiceId}" onchange="state.settings.emailjsServiceId=this.value;window.save()" placeholder="service_xxxx" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
+                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Template ID</label><input value="${state.settings.emailjsTemplateId}" onchange="state.settings.emailjsTemplateId=this.value;window.save()" placeholder="template_xxxx" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
+                                <div><label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-widest">Public Key</label><input value="${state.settings.emailjsPublicKey}" onchange="state.settings.emailjsPublicKey=this.value;window.save()" placeholder="pk_xxxx" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none"></div>
                                 <div class="bg-indigo-50 p-6 rounded-3xl">
                                     <h4 class="text-indigo-900 text-sm font-black uppercase tracking-widest mb-2">How to host free?</h4>
                                     <p class="text-xs text-indigo-700 leading-relaxed">Go to your GitHub repo <b>Settings > Pages</b>. Select <b>main</b> branch and click <b>Save</b>. Your store will be live in 1 minute!</p>
@@ -523,8 +563,9 @@
             if (count > 0) { badge.innerText = count; badge.classList.remove('hidden'); }
             else badge.classList.add('hidden');
             
-            document.getElementById('nav-store-name').innerText = state.settings.storeName;
-            document.getElementById('footer-store-name').innerText = state.settings.storeName;
+            const name = state.settings.storeName || 'GLDK';
+            document.getElementById('nav-store-name').innerText = name;
+            document.getElementById('footer-store-name').innerText = name;
             document.getElementById('footer-year').innerText = new Date().getFullYear();
         }
 
@@ -532,6 +573,11 @@
         window.shop = shop;
         window.admin = admin;
         window.state = state;
+        window.save = save;
+        window.setPaymentMethod = (method) => {
+            state.checkoutPaymentMethod = method;
+            router.render();
+        };
 
         router.render();
 
